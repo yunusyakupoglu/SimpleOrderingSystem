@@ -12,5 +12,6 @@ namespace Entities
         public int ProductId { get; set; }
         public int Stock { get; set; }
         public bool isReady { get; set; }
+
     }
 }

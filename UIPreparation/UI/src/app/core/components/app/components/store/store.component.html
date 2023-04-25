@@ -89,7 +89,7 @@
                   <th mat-header-cell *matHeaderCellDef></th>
                   <td style="width: 25px;" mat-cell *matCellDef="let element">
                     <a *ngIf="checkClaim('UpdateStoreCommand')" data-toggle="modal" data-target="#store"
-                      (click)="getStoreById(element.id)">
+                      (click)="getStoreDtoById(element.id)">
                       <i title="{{'Update'| translate}}" style="color:#ff5722;" class="far fa-edit"></i>
                     </a>
                   </td>
@@ -136,19 +136,19 @@
           <div class="row">
             <div class="col-md-12">
               <mat-form-field>
-                <mat-label>Product Id</mat-label>
-                <mat-select formControlName="productId" name="productId">
-                  <mat-option *ngFor="let item of productList" [value]="item.id">
-                    {{item.name}}
+                <input type="text" matInput [formControl]="productControl" placeholder="{{'ProductName'|translate}}" [matAutocomplete]="auto">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                  <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                    {{option.name}} / {{option.size}}
                   </mat-option>
-                </mat-select>
+                </mat-autocomplete>
               </mat-form-field>
             </div>
           </div>
           <div class="row">
             <div class="col col-md-12">
               <mat-form-field class="example-full-width">
-                <input matInput placeholder="stock" type="text" id="stock" name="stock" formControlName="stock" />
+                <input matInput placeholder="{{'Stock'|translate}}" type="text" id="stock" name="stock" formControlName="stock" />
                 <div class="alert alert-danger"
                   *ngIf="storeAddForm.get('stock')!.hasError('stock') && storeAddForm.get('stock')!.dirty">
                 </div>
@@ -157,7 +157,7 @@
           </div>
           <div class="row">
             <div class="col col-md-2">
-              <mat-checkbox formControlName="isReady" id="isReady" name="isReady"> isReady
+              <mat-checkbox formControlName="isReady" id="isReady" name="isReady"> {{'isReady'|translate}}
               </mat-checkbox>
             </div>
           </div>

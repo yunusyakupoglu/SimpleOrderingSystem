@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,9 +11,14 @@ import { Order } from './models/order';
 import { Customer } from '../customer/models/customer';
 import { CustomerService } from '../customer/services/customer.service';
 import { OrderService } from './services/order.service';
+import { OrderDto } from './models/orderDto';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { Product } from '../product/models/Product';
 import { ProductService } from '../product/services/Product.service';
-import { OrderDto } from './models/orderDto';
+import { Store } from '../store/models/store';
+import { StoreService } from '../store/services/store.service';
+import { StoreDto } from '../store/models/storeDto';
 
 declare var jQuery: any;
 
@@ -28,46 +33,94 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	@ViewChild(MatPaginator) paginator: MatPaginator;
 	@ViewChild(MatSort) sort: MatSort;
 	displayedColumns: string[] = [
-		 'customerName',
-		  'productName',
-		   'stock',
-		    'update',
-			 'delete'
-			];
+		'customerName',
+		'productName',
+		'stock',
+		'update',
+		'delete'
+	];
 
 	orderList: Order[];
 	orderDtoList: OrderDto[];
 	order: Order = new Order();
-	productList: Product[];
+	storeDtoList: StoreDto[];
 	customerList: Customer[];
 
 	orderAddForm: FormGroup;
 
+	customerControl = new FormControl();
+	storeDtoControl = new FormControl();
+	filteredOptionsWithStoreDto: Observable<StoreDto[]>;
+	filteredOptionsWithCustomer: Observable<Customer[]>;
+
+
+
 
 	orderId: number;
 
-	constructor(private orderService: OrderService, private lookupService: LookUpService, private alertifyService: AlertifyService, private formBuilder: FormBuilder, private authService: AuthService, private productService: ProductService, private customerService: CustomerService) { }
+	constructor(private orderService: OrderService, private lookupService: LookUpService, private alertifyService: AlertifyService, private formBuilder: FormBuilder, private authService: AuthService, private productService: ProductService, private storeService: StoreService, private customerService: CustomerService) { }
 
 	ngAfterViewInit(): void {
 		this.getOrderDtoList();
 	}
 
 	ngOnInit() {
-		this.getProducts();
-		this.getCustomers();
+		this.getCustomersLookUp();
+		this.getStoresLookUp();
 		this.createOrderAddForm();
+
 	}
 
+	getStoresLookUp() {
+		this.storeService.getStoreDtoList().subscribe(data => {
+			this.storeDtoList = data;			
 
-	getOrderList() {
-		this.orderService.getOrderList().subscribe(data => {
-			this.orderList = data;
-			this.dataSource = new MatTableDataSource(data);
-			this.configDataTable();
+			this.filteredOptionsWithStoreDto = this.storeDtoControl.valueChanges.pipe(
+				startWith(''),
+				map(value => {
+				  const name = typeof value === 'string' ? value : value?.name;
+				  return name ? this._filterStoreDto(name as string) : this.storeDtoList.slice();
+				}))
 		});
 	}
 
-		getOrderDtoList() {
+	displayFnStoreDto(data: StoreDto): string {
+		return data && data.productName ? data.productName : '';
+	  }
+	
+	  private _filterStoreDto(name: string): StoreDto[] {
+		const filterValue = name.toLowerCase();
+	
+		return this.storeDtoList.filter(option => option.productName.toLowerCase().includes(filterValue));
+	  }
+
+	
+
+	getCustomersLookUp() {
+		this.customerService.getCustomerList().subscribe(data => {
+			this.customerList = data;
+			
+
+			this.filteredOptionsWithCustomer = this.customerControl.valueChanges.pipe(
+				startWith(''),
+				map(value => {
+				  const name = typeof value === 'string' ? value : value?.name;
+				  return name ? this._filterCustomer(name as string) : this.customerList.slice();
+				}))
+		});
+	}
+
+	displayFnCustomer(data: Customer): string {
+		return data && data.customerName ? data.customerName : '';
+	  }
+	
+	  private _filterCustomer(name: string): Customer[] {
+		const filterValue = name.toLowerCase();
+	
+		return this.customerList.filter(option => option.customerName.toLowerCase().includes(filterValue));
+	  }
+
+	getOrderDtoList() {
 		this.orderService.getOrderDtoList().subscribe(data => {
 			this.orderDtoList = data;
 			this.dataSource = new MatTableDataSource(data);
@@ -77,7 +130,8 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	}
 
 	save() {
-
+		this.orderAddForm.controls.productId.setValue(this.storeDtoControl.value.productId);		
+		this.orderAddForm.controls.customerId.setValue(this.customerControl.value.id);		
 		if (this.orderAddForm.valid) {
 			this.order = Object.assign({}, this.orderAddForm.value)
 
@@ -93,7 +147,7 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		this.order.createdUserId = this.authService.getUserId();
 		this.order.lastUpdatedUserId = this.authService.getUserId();
 		this.orderService.addOrder(this.order).subscribe(data => {
-			this.getOrderList();
+			this.getOrderDtoList();
 			this.order = new Order();
 			jQuery('#order').modal('hide');
 			this.alertifyService.success(data);
@@ -106,9 +160,10 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	updateOrder() {
 		this.order.lastUpdatedUserId = this.authService.getUserId();
 		this.orderService.updateOrder(this.order).subscribe(data => {
-			var index = this.orderList.findIndex(x => x.id == this.order.id);
-			this.orderList[index] = this.order;
-			this.dataSource = new MatTableDataSource(this.orderList);
+			var index = this.orderDtoList.findIndex(x => x.id == this.order.id);
+			this.orderDtoList[index] = this.order;
+			this.getOrderDtoList();
+			this.dataSource = new MatTableDataSource(this.orderDtoList);
 			this.configDataTable();
 			this.order = new Order();
 			jQuery('#order').modal('hide');
@@ -137,8 +192,8 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	deleteOrder(orderId: number) {
 		this.orderService.deleteOrder(orderId).subscribe(data => {
 			this.alertifyService.success(data.toString());
-			this.orderList = this.orderList.filter(x => x.id != orderId);
-			this.dataSource = new MatTableDataSource(this.orderList);
+			this.orderDtoList = this.orderDtoList.filter(x => x.id != orderId);
+			this.dataSource = new MatTableDataSource(this.orderDtoList);
 			this.configDataTable();
 		})
 	}
@@ -182,17 +237,8 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		}
 	}
 
-	getProducts() {
-		this.productService.getProductList().subscribe(data => {
-			this.productList = data;
-		});
-	}
 
-	getCustomers() {
-		this.customerService.getCustomerList().subscribe(data => {
-			this.customerList = data;
-		});
-	}
+
 
 
 }

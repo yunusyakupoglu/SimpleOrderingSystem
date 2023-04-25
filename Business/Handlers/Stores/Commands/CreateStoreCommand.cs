@@ -50,7 +50,9 @@ namespace Business.Handlers.Stores.Commands
             [SecuredOperation(Priority = 1)]
             public async Task<IResult> Handle(CreateStoreCommand request, CancellationToken cancellationToken)
             {
-                var isThereStoreRecord = _storeRepository.Query().Any(u => u.CreatedUserId == request.CreatedUserId);
+                var isThereStoreRecord = _storeRepository.Query().Any(u => u.ProductId == request.ProductId &&
+                u.Stock == request.Stock &&
+                u.isReady == request.isReady);
 
                 if (isThereStoreRecord == true)
                     return new ErrorResult(Messages.NameAlreadyExist);

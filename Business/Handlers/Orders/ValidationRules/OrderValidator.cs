@@ -19,7 +19,7 @@ namespace Business.Handlers.Orders.ValidationRules
         public UpdateOrderValidator()
         {
             RuleFor(x => x.ProductId).NotEmpty();
-            RuleFor(x => x.Stock).NotEmpty();
+            //RuleFor(x => x.Stock).NotEmpty();
 
         }
     }

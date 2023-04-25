@@ -17,7 +17,6 @@ namespace Business.Handlers.Stores.Queries
     public class IsExistStoreQuery : IRequest<IDataResult<bool>>
     {
         public int ProductId { get; set; }
-        //public int SizeId { get; set; }
         public int Stock { get; set; }
 
         public class IsExistStoreQueryHandler : IRequestHandler<IsExistStoreQuery, IDataResult<bool>>
@@ -32,9 +31,7 @@ namespace Business.Handlers.Stores.Queries
             [SecuredOperation(Priority = 1)]
             public async Task<IDataResult<bool>> Handle(IsExistStoreQuery request, CancellationToken cancellationToken)
             {
-                var store = await _storeRepository.GetAsync(p => p.ProductId == request.ProductId);
-                bool result = store!=null && store.Stock >= request.Stock;
-                return new SuccessDataResult<bool>(result);
+                return new SuccessDataResult<bool>(await _storeRepository.IsExistStore(request.ProductId, request.Stock));
             }
         }
     }

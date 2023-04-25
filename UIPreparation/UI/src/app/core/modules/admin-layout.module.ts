@@ -32,6 +32,7 @@ import { CustomerComponent } from '../components/app/components/customer/custome
 import { ProductComponent } from '../components/app/components/product/product.component';
 import { StoreComponent } from '../components/app/components/store/store.component';
 import { OrderComponent } from '../components/app/components/order/order.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 // export function layoutHttpLoaderFactory(http: HttpClient) {
@@ -56,6 +57,7 @@ import { OrderComponent } from '../components/app/components/order/order.compone
         MatSortModule,
         MatCheckboxModule,
         NgbModule,
+        MatAutocompleteModule,
         NgMultiSelectDropDownModule,
         SweetAlert2Module,
         TranslateModule.forChild({

@@ -51,7 +51,7 @@ namespace WebAPI.Controllers
         [HttpGet("getdtolist")]
         public async Task<IActionResult> GetDtoList()
         {
-            var result = await Mediator.Send(new GetStoreDtoQuery());
+            var result = await Mediator.Send(new GetStoreDtosQuery());
             if (result.Success)
             {
                 return Ok(result.Data);
@@ -72,6 +72,26 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await Mediator.Send(new GetStoreQuery { Id = id });
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            return BadRequest(result.Message);
+        }
+
+        ///<summary>
+        ///It brings the details according to its id.
+        ///</summary>
+        ///<remarks>Stores</remarks>
+        ///<return>Stores List</return>
+        ///<response code="200"></response>  
+        [Produces("application/json", "text/plain")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Store))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [HttpGet("getdtobyid")]
+        public async Task<IActionResult> GetDtoById(int id)
+        {
+            var result = await Mediator.Send(new GetStoreDtoQuery { Id = id });
             if (result.Success)
             {
                 return Ok(result.Data);

@@ -14,7 +14,6 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { LoginGuard } from './core/guards/login-guard';
 import { AuthInterceptorService } from './core/interceptors/auth-interceptor.service';
 import { HttpEntityRepositoryService } from './core/services/http-entity-repository.service';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { TranslationService } from './core/services/translation.service';
 
 
@@ -45,7 +44,6 @@ export function tokenGetter() {
     NgMultiSelectDropDownModule.forRoot(),
     SweetAlert2Module.forRoot(),
     NgbModule,
-    MatAutocompleteModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

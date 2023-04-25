@@ -27,6 +27,10 @@ export class StoreService {
     return this.httpClient.get<Store>(environment.getApiUrl + '/stores/getbyid?id='+id)
   }
 
+  getStoreDtoById(id: number): Observable<StoreDto> {
+    return this.httpClient.get<StoreDto>(environment.getApiUrl + '/stores/getdtobyid?id='+id)
+  }
+
   addStore(store: Store): Observable<any> {
 
     return this.httpClient.post(environment.getApiUrl + '/stores/', store, { responseType: 'text' });

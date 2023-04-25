@@ -14,6 +14,7 @@ import { StoreService } from './services/store.service';
 import { StoreDto } from './models/storeDto';
 import { map, startWith } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
+import { LookUp } from 'app/core/models/lookUp';
 
 declare var jQuery: any;
 
@@ -37,9 +38,12 @@ export class StoreComponent implements AfterViewInit, OnInit {
 	storeList: Store[];
 	storeDtoList: StoreDto[];
 	store: Store = new Store();
+	storeDto: StoreDto = new StoreDto();
 	productList: Product[];
 	storeAddForm: FormGroup;
 
+	productControl = new FormControl();
+	filteredOptions: Observable<Product[]>;
 	storeId: number;
 
 
@@ -47,12 +51,11 @@ export class StoreComponent implements AfterViewInit, OnInit {
 
 	ngAfterViewInit(): void {
 		this.getStoreDtoList();
-		
 	}
 
 	ngOnInit() {
-		this.getProducts();
 		this.createStoreAddForm();
+		this.getProductsList();
 	}
 
 	getStoreList() {
@@ -68,64 +71,54 @@ export class StoreComponent implements AfterViewInit, OnInit {
 			this.storeDtoList = data;
 			this.dataSource = new MatTableDataSource(data);
 			this.configDataTable();
-			console.log(data, "store data");
-			
 		});
 	}
 
 
 	save() {
+		this.storeAddForm.controls.productId.setValue(this.productControl.value.id);
 		if (this.storeAddForm.valid) {
 			this.store = Object.assign({}, this.storeAddForm.value)
-
 			if (this.store.id == 0)
 				this.addStore();
 			else
 				this.updateStore();
 		}
-
 	}
 
 	addStore() {
 		this.store.createdUserId = this.authService.getUserId();
 		this.store.lastUpdatedUserId = this.authService.getUserId();
 		this.storeService.addStore(this.store).subscribe(data => {
-			this.getStoreList();
+			this.getStoreDtoList();
 			this.store = new Store();
 			jQuery('#store').modal('hide');
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.storeAddForm);
-
 		})
-
 	}
 
 	updateStore() {
 		this.store.lastUpdatedUserId = this.authService.getUserId();
 		this.storeService.updateStore(this.store).subscribe(data => {
-
-			var index = this.storeList.findIndex(x => x.id == this.store.id);
-			this.storeList[index] = this.store;
-			this.dataSource = new MatTableDataSource(this.storeList);
+			var index = this.storeDtoList.findIndex(x => x.id == this.storeDto.id);
+			this.storeDtoList[index] = this.storeDto;
+			this.getStoreDtoList();
+			this.dataSource = new MatTableDataSource(this.storeDtoList);
 			this.configDataTable();
 			this.store = new Store();
 			jQuery('#store').modal('hide');
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.storeAddForm);
-
 		})
-
 	}
 
 	createStoreAddForm() {
 		this.storeAddForm = this.formBuilder.group({
 			id: [0],
 			createdUserId: [0],
-			createdDate: [Date.now],
 			lastUpdatedUserId: [0],
-			lastUpdatedDate: [Date.now],
 			status: [true],
-			isDeleted: [false],
 			productId: [0, Validators.required],
 			stock: [0, Validators.required],
 			isReady: [false, Validators.required]
@@ -135,17 +128,33 @@ export class StoreComponent implements AfterViewInit, OnInit {
 	deleteStore(storeId: number) {
 		this.storeService.deleteStore(storeId).subscribe(data => {
 			this.alertifyService.success(data.toString());
-			this.storeList = this.storeList.filter(x => x.id != storeId);
-			this.dataSource = new MatTableDataSource(this.storeList);
+			this.storeDtoList = this.storeDtoList.filter(x => x.id != storeId);
+			this.dataSource = new MatTableDataSource(this.storeDtoList);
 			this.configDataTable();
 		})
 	}
 
 	getStoreById(storeId: number) {
+		debugger;
 		this.clearFormGroup(this.storeAddForm);
 		this.storeService.getStoreById(storeId).subscribe(data => {
 			this.store = data;
 			this.storeAddForm.patchValue(data);
+		})
+	}
+
+	getStoreDtoById(storeId: number) {
+		this.clearFormGroup(this.storeAddForm);
+		this.storeService.getStoreDtoById(storeId).subscribe(data => {
+			let x = data.productId;
+			let a = this.storeAddForm.get("productId");
+			this.storeDto = data;
+			this.storeAddForm.patchValue(data);
+			console.log(data,"asdata");
+			console.log(x,"x");
+			console.log(a,"a");
+			
+			
 		})
 	}
 
@@ -158,6 +167,16 @@ export class StoreComponent implements AfterViewInit, OnInit {
 		Object.keys(group.controls).forEach(key => {
 			group.get(key).setErrors(null);
 			if (key == 'id')
+				group.get(key).setValue(0);
+				if (key == 'createdUserId')
+				group.get(key).setValue(0);
+				if (key == 'lastUpdatedUserId')
+				group.get(key).setValue(0);
+				if (key == 'productId')
+				group.get(key).setValue(0);
+				if (key == 'stock')
+				group.get(key).setValue(0);
+				if (key == 'isReady')
 				group.get(key).setValue(0);
 		});
 	}
@@ -180,10 +199,27 @@ export class StoreComponent implements AfterViewInit, OnInit {
 		}
 	}
 
-	getProducts() {
+	displayFn(data: Product): string {
+		return data && data.name ? data.name : '';
+	  }
+	
+	  private _filter(name: string): Product[] {
+		const filterValue = name.toLowerCase();
+	
+		return this.productList.filter(option => option.name.toLowerCase().includes(filterValue));
+	  }
+
+	  getProductsList(){
 		this.productService.getProductList().subscribe(data => {
 			this.productList = data;
+
+			this.filteredOptions = this.productControl.valueChanges.pipe(
+				startWith(''),
+				map(value => {
+				  const name = typeof value === 'string' ? value : value?.name;
+				  return name ? this._filter(name as string) : this.productList.slice();
+				}));
 		});
-	}
+	  }
 
 }

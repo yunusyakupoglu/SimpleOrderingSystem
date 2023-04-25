@@ -54,7 +54,9 @@ namespace Business.Handlers.Orders.Commands
             [SecuredOperation(Priority = 1)]
             public async Task<IResult> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
             {
-                var isThereOrderRecord = _orderRepository.Query().Any(u => u.CreatedUserId == request.CreatedUserId);
+                var isThereOrderRecord = _orderRepository.Query().Any(u => u.CustomerId == request.CustomerId &&
+                u.ProductId == request.ProductId &&
+                u.Stock == request.Stock);
 
                 if (isThereOrderRecord == true)
                     return new ErrorResult(Messages.NameAlreadyExist);
@@ -79,11 +81,7 @@ namespace Business.Handlers.Orders.Commands
 
                     };
 
-
-
-                    _orderRepository.Add(addedOrder);
-                    await _orderRepository.SaveChangesAsync();
-                    await _mediator.Send(new UpdateStoreCommand
+                    var update = await _mediator.Send(new UpdateStoreCommand
                     {
                         isReady = getStoreByProductIdAndSize.Result.Data.IsReady,
                         CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDateByStore,
@@ -96,6 +94,12 @@ namespace Business.Handlers.Orders.Commands
                         Stock = getStoreByProductIdAndSize.Result.Data.Stock - request.Stock,
                         ProductId = getStoreByProductIdAndSize.Result.Data.ProductId
                     });
+
+                    if (update.Success)
+                    {
+                        _orderRepository.Add(addedOrder);
+                        await _orderRepository.SaveChangesAsync();
+                    }
                     return new SuccessResult(Messages.Added);
                 }
                 return new ErrorResult("Sipariş Kaydı oluşturulamadı.");

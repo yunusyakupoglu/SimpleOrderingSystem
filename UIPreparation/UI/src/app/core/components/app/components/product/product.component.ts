@@ -11,6 +11,8 @@ import { ProductService } from './services/Product.service';
 import { environment } from 'environments/environment';
 import { ESize, SizeMapping } from './models/size';
 import { LookUp } from 'app/core/models/lookUp';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 declare var jQuery: any;
 
 @Component({
@@ -29,6 +31,9 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	sizesLookUp: LookUp[] = [];
 	sizeNames: string[] = Object.keys(SizeMapping);
 	selectedValue: LookUp;
+
+	sizeControl = new FormControl();
+  filteredOptions: Observable<LookUp[]>;
 
 
 	productList: Product[];
@@ -49,13 +54,32 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	ngOnInit() {
 
 		this.createProductAddForm();
-		this.sizeNames.forEach(element => {
-			this.sizesLookUp.push({ id: Number(element), label: SizeMapping[Number(element)] });
-			
-
-		});
+		this.getSizesEnumsLookUp();
 
 	}
+
+	getSizesEnumsLookUp(){
+		this.sizeNames.forEach(element => {
+			this.sizesLookUp.push({ id: Number(element), label: SizeMapping[Number(element)] });
+		});
+		this.filteredOptions = this.sizeControl.valueChanges.pipe(
+			startWith(''),
+			map(value => {
+				const name = typeof value === 'string' ? value : value?.name;
+				return name ? this._filter(name as string) : this.sizesLookUp.slice();
+			  }),
+		  );
+	}
+
+	private _filter(value: string): LookUp[] {
+		const filterValue = value.toLowerCase();
+	
+		return this.sizesLookUp.filter(option => option.label.toLowerCase().includes(filterValue));
+	  }
+
+	  displayFn(data: LookUp): string {
+		return data && data.label ? data.label : '';
+	  }
 
 
 	getProductList() {
@@ -67,7 +91,9 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	save() {
-		debugger;
+		this.productAddForm.controls.size.setValue(this.sizeControl.value.label);		
+		
+		
 		if (this.productAddForm.valid) {
 			this.product = Object.assign({}, this.productAddForm.value)
 
@@ -80,7 +106,6 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	addProduct() {
-		debugger;
 		this.product.createdUserId = this.authService.getUserId();
 		this.product.lastUpdatedUserId = this.authService.getUserId();
 		this.productService.addProduct(this.product).subscribe(data => {

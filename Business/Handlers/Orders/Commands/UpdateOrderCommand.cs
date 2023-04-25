@@ -13,7 +13,9 @@ using System.Threading.Tasks;
 using System.Linq;
 using Core.Aspects.Autofac.Validation;
 using Business.Handlers.Orders.ValidationRules;
-
+using Business.Handlers.Stores.Commands;
+using Business.Handlers.Stores.Queries;
+using System;
 
 namespace Business.Handlers.Orders.Commands
 {
@@ -50,7 +52,8 @@ namespace Business.Handlers.Orders.Commands
             public async Task<IResult> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
             {
                 var isThereOrderRecord = await _orderRepository.GetAsync(u => u.Id == request.Id);
-
+                var getStoreByProductIdAndSize = _mediator.Send(new GetStoreByProductIdAndSizeQuery { ProductId = request.ProductId });
+                var newStoreStock = isThereOrderRecord.Stock - request.Stock;
 
                 isThereOrderRecord.CreatedUserId = request.CreatedUserId;
                 isThereOrderRecord.CreatedDate = request.CreatedDate;
@@ -63,9 +66,27 @@ namespace Business.Handlers.Orders.Commands
                 isThereOrderRecord.Stock = request.Stock;
 
 
+                var update = await _mediator.Send(new UpdateStoreCommand
+                {
+                    isReady = getStoreByProductIdAndSize.Result.Data.IsReady,
+                    CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDateByStore,
+                    CreatedUserId = getStoreByProductIdAndSize.Result.Data.CreatedUserIdByStore,
+                    isDeleted = getStoreByProductIdAndSize.Result.Data.isDeletedByStore,
+                    LastUpdatedDate = DateTime.Now,
+                    LastUpdatedUserId = request.LastUpdatedUserId,
+                    Status = getStoreByProductIdAndSize.Result.Data.StatusByStore,
+                    Id = getStoreByProductIdAndSize.Result.Data.StoreId,
+                    Stock = newStoreStock + getStoreByProductIdAndSize.Result.Data.Stock,
+                    ProductId = getStoreByProductIdAndSize.Result.Data.ProductId
+                });
+
+                if (update.Success)
+                {
                 _orderRepository.Update(isThereOrderRecord);
                 await _orderRepository.SaveChangesAsync();
                 return new SuccessResult(Messages.Updated);
+                }
+                return new ErrorResult("Sipariş kaydı güncellenemedi.");
             }
         }
     }

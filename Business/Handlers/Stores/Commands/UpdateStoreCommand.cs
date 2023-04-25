@@ -60,7 +60,8 @@ namespace Business.Handlers.Stores.Commands
                 isThereStoreRecord.isDeleted = request.isDeleted;
                 isThereStoreRecord.ProductId = request.ProductId;
                 isThereStoreRecord.Stock = request.Stock;
-                isThereStoreRecord.isReady = request.isReady;
+                isThereStoreRecord.isReady = (isThereStoreRecord.Stock == 0) ? false : request.isReady;
+
 
 
                 _storeRepository.Update(isThereStoreRecord);

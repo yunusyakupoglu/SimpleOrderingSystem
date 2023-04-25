@@ -29,9 +29,6 @@ export class CustomerComponent implements AfterViewInit, OnInit {
 
 	customerAddForm: FormGroup;
 
-	myControl = new FormControl();
-	options: string[] = ['Delhi', 'Mumbai', 'Banglore'];
-
 
 	customerId: number;
 
