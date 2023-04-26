@@ -1,5 +1,7 @@
-﻿using Core.Utilities.Results;
+﻿using Amazon.Runtime.Internal;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
 using Entities.Dtos;
 using MediatR;
 using System;
@@ -11,9 +13,11 @@ using System.Threading.Tasks;
 
 namespace Business.Handlers.Orders.Queries
 {
-    public class GetOrderDtoQuery : IRequest<IDataResult<IEnumerable<OrderDto>>>
+    public class GetOrderDtoQuery : IRequest<IDataResult<OrderDto>>
     {
-        public class GetOrderDtoQueryHandler : IRequestHandler<GetOrderDtoQuery, IDataResult<IEnumerable<OrderDto>>>
+        public int Id { get; set; }
+
+        public class GetOrderDtoQueryHandler : IRequestHandler<GetOrderDtoQuery, IDataResult<OrderDto>>
         {
             private readonly IOrderRepository _orderRepository;
 
@@ -22,9 +26,9 @@ namespace Business.Handlers.Orders.Queries
                 _orderRepository = orderRepository;
             }
 
-            public async Task<IDataResult<IEnumerable<OrderDto>>> Handle(GetOrderDtoQuery request, CancellationToken cancellationToken)
+            public async Task<IDataResult<OrderDto>> Handle(GetOrderDtoQuery request, CancellationToken cancellationToken)
             {
-                return new SuccessDataResult<IEnumerable<OrderDto>>(await _orderRepository.GetOrderDto());
+                return new SuccessDataResult<OrderDto>(await _orderRepository.GetDtoAsync(request.Id));
             }
         }
     }

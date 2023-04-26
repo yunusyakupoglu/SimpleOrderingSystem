@@ -58,6 +58,38 @@ export class StoreComponent implements AfterViewInit, OnInit {
 		this.getProductsList();
 	}
 
+		applyFilter(event: Event) {
+		const filterValue = (event.target as HTMLInputElement).value;
+		this.dataSource.filter = filterValue.trim().toLowerCase();
+
+		if (this.dataSource.paginator) {
+			this.dataSource.paginator.firstPage();
+		}
+	}
+
+	displayFn(data: Product): string {
+		return data && data.name ? data.name : '';
+	  }
+	
+	  private _filter(name: string): Product[] {
+		const filterValue = name.toLowerCase();
+	
+		return this.productList.filter(option => option.name.toLowerCase().includes(filterValue));
+	  }
+
+	  getProductsList(){
+		this.productService.getProductList().subscribe(data => {
+			this.productList = data;
+
+			this.filteredOptions = this.productControl.valueChanges.pipe(
+				startWith(''),
+				map(value => {
+				  const name = typeof value === 'string' ? value : value?.name;
+				  return name ? this._filter(name as string) : this.productList.slice();
+				}));
+		});
+	  }
+
 	getStoreList() {
 		this.storeService.getStoreList().subscribe(data => {
 			this.storeList = data;
@@ -76,9 +108,14 @@ export class StoreComponent implements AfterViewInit, OnInit {
 
 
 	save() {
+		debugger;
 		this.storeAddForm.controls.productId.setValue(this.productControl.value.id);
+		// this.storeAddForm.controls.status.setValue(this.store.status);
+		// this.storeAddForm.controls.createdUserId.setValue(this.store.createdUserId);
+		// this.storeAddForm.controls.id.setValue(this.store.id);
 		if (this.storeAddForm.valid) {
 			this.store = Object.assign({}, this.storeAddForm.value)
+			
 			if (this.store.id == 0)
 				this.addStore();
 			else
@@ -99,6 +136,7 @@ export class StoreComponent implements AfterViewInit, OnInit {
 	}
 
 	updateStore() {
+		debugger;
 		this.store.lastUpdatedUserId = this.authService.getUserId();
 		this.storeService.updateStore(this.store).subscribe(data => {
 			var index = this.storeDtoList.findIndex(x => x.id == this.storeDto.id);
@@ -114,6 +152,7 @@ export class StoreComponent implements AfterViewInit, OnInit {
 	}
 
 	createStoreAddForm() {
+		debugger;
 		this.storeAddForm = this.formBuilder.group({
 			id: [0],
 			createdUserId: [0],
@@ -135,26 +174,37 @@ export class StoreComponent implements AfterViewInit, OnInit {
 	}
 
 	getStoreById(storeId: number) {
-		debugger;
 		this.clearFormGroup(this.storeAddForm);
 		this.storeService.getStoreById(storeId).subscribe(data => {
 			this.store = data;
 			this.storeAddForm.patchValue(data);
+			console.log(data,"adata");
+			
 		})
 	}
 
 	getStoreDtoById(storeId: number) {
 		this.clearFormGroup(this.storeAddForm);
 		this.storeService.getStoreDtoById(storeId).subscribe(data => {
-			let x = data.productId;
-			let a = this.storeAddForm.get("productId");
-			this.storeDto = data;
-			this.storeAddForm.patchValue(data);
-			console.log(data,"asdata");
-			console.log(x,"x");
-			console.log(a,"a");
+			this.store =  {
+				id : data.id,
+				isDeleted : data.isDeleted,
+				isReady : data.isReady,
+				status: data.status,
+				createdDate: data.createdDate,
+				createdUserId: data.createdUserId,
+				lastUpdatedDate: data.lastUpdatedDate,
+				lastUpdatedUserId: data.lastUpdatedUserId,
+				productId: data.productId,
+				stock: data.stock
+			};
 			
-			
+			 // Set selected product in mat-autocomplete
+			 const selectedProduct = this.productList.find(product => product.id === data.productId);
+			 this.productControl.setValue(selectedProduct);
+
+			 this.storeAddForm.patchValue(data);
+
 		})
 	}
 
@@ -189,37 +239,5 @@ export class StoreComponent implements AfterViewInit, OnInit {
 		this.dataSource.paginator = this.paginator;
 		this.dataSource.sort = this.sort;
 	}
-
-	applyFilter(event: Event) {
-		const filterValue = (event.target as HTMLInputElement).value;
-		this.dataSource.filter = filterValue.trim().toLowerCase();
-
-		if (this.dataSource.paginator) {
-			this.dataSource.paginator.firstPage();
-		}
-	}
-
-	displayFn(data: Product): string {
-		return data && data.name ? data.name : '';
-	  }
-	
-	  private _filter(name: string): Product[] {
-		const filterValue = name.toLowerCase();
-	
-		return this.productList.filter(option => option.name.toLowerCase().includes(filterValue));
-	  }
-
-	  getProductsList(){
-		this.productService.getProductList().subscribe(data => {
-			this.productList = data;
-
-			this.filteredOptions = this.productControl.valueChanges.pipe(
-				startWith(''),
-				map(value => {
-				  const name = typeof value === 'string' ? value : value?.name;
-				  return name ? this._filter(name as string) : this.productList.slice();
-				}));
-		});
-	  }
 
 }

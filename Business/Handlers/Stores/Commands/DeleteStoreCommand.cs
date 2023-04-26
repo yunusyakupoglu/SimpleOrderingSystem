@@ -37,8 +37,8 @@ namespace Business.Handlers.Stores.Commands
             public async Task<IResult> Handle(DeleteStoreCommand request, CancellationToken cancellationToken)
             {
                 var storeToDelete = _storeRepository.Get(p => p.Id == request.Id);
-
-                _storeRepository.Delete(storeToDelete);
+                storeToDelete.isDeleted = true;
+                _storeRepository.Update(storeToDelete);
                 await _storeRepository.SaveChangesAsync();
                 return new SuccessResult(Messages.Deleted);
             }

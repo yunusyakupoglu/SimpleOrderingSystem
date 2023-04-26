@@ -140,6 +140,16 @@ export class CustomerComponent implements AfterViewInit, OnInit {
 			group.get(key).setErrors(null);
 			if (key == 'id')
 				group.get(key).setValue(0);
+			if (key == 'customerName')
+				group.get(key).setValue(0);
+			if (key == 'customerCode')
+				group.get(key).setValue(0);
+			if (key == 'customerAddress')
+				group.get(key).setValue(0);
+			if (key == 'phoneNumber')
+				group.get(key).setValue(0);
+				if (key == 'email')
+				group.get(key).setValue(0);
 		});
 	}
 

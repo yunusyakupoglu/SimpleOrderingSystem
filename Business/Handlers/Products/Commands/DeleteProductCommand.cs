@@ -37,8 +37,8 @@ namespace Business.Handlers.Products.Commands
             public async Task<IResult> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
             {
                 var productToDelete = _productRepository.Get(p => p.Id == request.Id);
-
-                _productRepository.Delete(productToDelete);
+                productToDelete.isDeleted = true;
+                _productRepository.Update(productToDelete);
                 await _productRepository.SaveChangesAsync();
                 return new SuccessResult(Messages.Deleted);
             }

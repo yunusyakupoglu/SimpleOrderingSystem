@@ -73,52 +73,52 @@ export class OrderComponent implements AfterViewInit, OnInit {
 
 	getStoresLookUp() {
 		this.storeService.getStoreDtoList().subscribe(data => {
-			this.storeDtoList = data;			
+			this.storeDtoList = data;
 
 			this.filteredOptionsWithStoreDto = this.storeDtoControl.valueChanges.pipe(
 				startWith(''),
 				map(value => {
-				  const name = typeof value === 'string' ? value : value?.name;
-				  return name ? this._filterStoreDto(name as string) : this.storeDtoList.slice();
+					const name = typeof value === 'string' ? value : value?.name;
+					return name ? this._filterStoreDto(name as string) : this.storeDtoList.slice();
 				}))
 		});
 	}
 
 	displayFnStoreDto(data: StoreDto): string {
 		return data && data.productName ? data.productName : '';
-	  }
-	
-	  private _filterStoreDto(name: string): StoreDto[] {
-		const filterValue = name.toLowerCase();
-	
-		return this.storeDtoList.filter(option => option.productName.toLowerCase().includes(filterValue));
-	  }
+	}
 
-	
+	private _filterStoreDto(name: string): StoreDto[] {
+		const filterValue = name.toLowerCase();
+
+		return this.storeDtoList.filter(option => option.productName.toLowerCase().includes(filterValue));
+	}
+
+
 
 	getCustomersLookUp() {
 		this.customerService.getCustomerList().subscribe(data => {
 			this.customerList = data;
-			
 
+			this.storeDtoControl.setValue(null);
 			this.filteredOptionsWithCustomer = this.customerControl.valueChanges.pipe(
 				startWith(''),
 				map(value => {
-				  const name = typeof value === 'string' ? value : value?.name;
-				  return name ? this._filterCustomer(name as string) : this.customerList.slice();
+					const name = typeof value === 'string' ? value : value?.name;
+					return name ? this._filterCustomer(name as string) : this.customerList.slice();
 				}))
 		});
 	}
 
 	displayFnCustomer(data: Customer): string {
 		return data && data.customerName ? data.customerName : '';
-	  }
-	
-	  private _filterCustomer(name: string): Customer[] {
+	}
+
+	private _filterCustomer(name: string): Customer[] {
 		const filterValue = name.toLowerCase();
-	
+
 		return this.customerList.filter(option => option.customerName.toLowerCase().includes(filterValue));
-	  }
+	}
 
 	getOrderDtoList() {
 		this.orderService.getOrderDtoList().subscribe(data => {
@@ -130,8 +130,10 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	}
 
 	save() {
-		this.orderAddForm.controls.productId.setValue(this.storeDtoControl.value.productId);		
-		this.orderAddForm.controls.customerId.setValue(this.customerControl.value.id);		
+		debugger;
+		this.orderAddForm.controls.productId.setValue(this.storeDtoControl.value.productId);
+		this.orderAddForm.controls.customerId.setValue(this.customerControl.value.id);
+		// this.orderAddForm.controls.id.setValue(this.order.id);
 		if (this.orderAddForm.valid) {
 			this.order = Object.assign({}, this.orderAddForm.value)
 
@@ -158,6 +160,7 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	}
 
 	updateOrder() {
+		debugger;
 		this.order.lastUpdatedUserId = this.authService.getUserId();
 		this.orderService.updateOrder(this.order).subscribe(data => {
 			var index = this.orderDtoList.findIndex(x => x.id == this.order.id);
@@ -178,11 +181,8 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		this.orderAddForm = this.formBuilder.group({
 			id: [0],
 			createdUserId: [0],
-			createdDate: [Date.now],
 			lastUpdatedUserId: [0],
-			lastUpdatedDate: [Date.now],
 			status: [true],
-			isDeleted: [false],
 			customerId: [0, Validators.required],
 			productId: [0, Validators.required],
 			stock: [0, Validators.required]
@@ -206,6 +206,44 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		})
 	}
 
+	getOrderDtoById(orderId: number) {
+		debugger;
+		this.clearFormGroup(this.orderAddForm);
+		this.orderService.getOrderDtoById(orderId).subscribe(data => {
+			this.order = {
+				id: data.id,
+				isDeleted: data.isDeleted,
+				status: data.status,
+				createdDate: data.createdDate,
+				createdUserId: data.createdUserId,
+				customerId: data.customerId,
+				lastUpdatedDate: data.lastUpdatedDate,
+				lastUpdatedUserId: data.lastUpdatedUserId,
+				productId: data.productId,
+				stock: data.stock
+			};
+			//this.orderAddForm.patchValue(data);
+			console.log(data, "odata");
+
+
+			// Set selected product in mat-autocomplete
+			const selectedProduct = this.storeDtoList.find(store => store.productId === data.productId);
+			this.storeDtoControl.setValue(selectedProduct);
+
+			console.log(selectedProduct, "sproduct");
+
+
+			// Set selected customer in mat-autocomplete
+			const selectedCustomer = this.customerList.find(customer => customer.id === data.customerId);
+			this.customerControl.setValue(selectedCustomer);
+			console.log(selectedCustomer, "scustomer");
+
+			this.orderAddForm.patchValue(data);
+
+
+		})
+	}
+
 
 	clearFormGroup(group: FormGroup) {
 
@@ -215,6 +253,12 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		Object.keys(group.controls).forEach(key => {
 			group.get(key).setErrors(null);
 			if (key == 'id')
+				group.get(key).setValue(0);
+			if (key == 'customerId')
+				group.get(key).setValue(0);
+			if (key == 'productId')
+				group.get(key).setValue(0);
+			if (key == 'stock')
 				group.get(key).setValue(0);
 		});
 	}

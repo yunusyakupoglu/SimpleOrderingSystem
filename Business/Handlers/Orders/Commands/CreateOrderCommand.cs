@@ -84,13 +84,13 @@ namespace Business.Handlers.Orders.Commands
                     var update = await _mediator.Send(new UpdateStoreCommand
                     {
                         isReady = getStoreByProductIdAndSize.Result.Data.IsReady,
-                        CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDateByStore,
-                        CreatedUserId = getStoreByProductIdAndSize.Result.Data.CreatedUserIdByStore,
-                        isDeleted = getStoreByProductIdAndSize.Result.Data.isDeletedByStore,
+                        CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDate,
+                        CreatedUserId = getStoreByProductIdAndSize.Result.Data.CreatedUserId,
+                        isDeleted = getStoreByProductIdAndSize.Result.Data.isDeleted,
                         LastUpdatedDate = DateTime.Now,
                         LastUpdatedUserId = request.LastUpdatedUserId,
-                        Status = getStoreByProductIdAndSize.Result.Data.StatusByStore,
-                        Id = getStoreByProductIdAndSize.Result.Data.StoreId,
+                        Status = getStoreByProductIdAndSize.Result.Data.Status,
+                        Id = getStoreByProductIdAndSize.Result.Data.Id,
                         Stock = getStoreByProductIdAndSize.Result.Data.Stock - request.Stock,
                         ProductId = getStoreByProductIdAndSize.Result.Data.ProductId
                     });

@@ -9,12 +9,12 @@ namespace Entities.Dtos
 {
     public class ProductWithStoreDto : IDto
     {
-        public int StoreId { get; set; }
+        public int Id { get; set; }
         public int ProductId { get; set; }
-        public DateTime CreatedDateByStore { get; set; }
-        public int CreatedUserIdByStore { get; set; }
-        public bool isDeletedByStore { get; set; }
-        public bool StatusByStore { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int CreatedUserId { get; set; }
+        public bool isDeleted { get; set; }
+        public bool Status { get; set; }
         public string ProductName { get; set; }
         public string Color { get; set; }
         public string Size { get; set; }

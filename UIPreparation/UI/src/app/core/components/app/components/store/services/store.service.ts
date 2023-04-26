@@ -28,6 +28,7 @@ export class StoreService {
   }
 
   getStoreDtoById(id: number): Observable<StoreDto> {
+    debugger;
     return this.httpClient.get<StoreDto>(environment.getApiUrl + '/stores/getdtobyid?id='+id)
   }
 
@@ -37,6 +38,7 @@ export class StoreService {
   }
 
   updateStore(store: Store): Observable<any> {
+    debugger;
     return this.httpClient.put(environment.getApiUrl + '/stores/', store, { responseType: 'text' });
 
   }

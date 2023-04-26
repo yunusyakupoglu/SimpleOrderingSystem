@@ -37,11 +37,11 @@ namespace DataAccess.Concrete.EntityFramework
                                    Size = p.Size,
                                    Stock = s.Stock,
                                    IsReady = s.isReady,
-                                   StoreId = s.Id,
-                                   CreatedDateByStore = s.CreatedDate,
-                                   CreatedUserIdByStore = s.CreatedUserId,
-                                   isDeletedByStore = s.isDeleted,
-                                   StatusByStore = s.Status
+                                   Id = s.Id,
+                                   CreatedDate = s.CreatedDate,
+                                   CreatedUserId = s.CreatedUserId,
+                                   isDeleted = s.isDeleted,
+                                   Status = s.Status
                                }).SingleOrDefaultAsync();
             return result;
         }
@@ -60,11 +60,11 @@ namespace DataAccess.Concrete.EntityFramework
                                     Size = p.Size,
                                     Stock = s.Stock,
                                     IsReady = s.isReady,
-                                    StoreId = s.Id,
-                                    CreatedDateByStore = s.CreatedDate,
-                                    CreatedUserIdByStore = s.CreatedUserId,
-                                    isDeletedByStore = s.isDeleted,
-                                    StatusByStore = s.Status
+                                    Id = s.Id,
+                                    CreatedDate = s.CreatedDate,
+                                    CreatedUserId = s.CreatedUserId,
+                                    isDeleted = s.isDeleted,
+                                    Status = s.Status
                                 }).SingleOrDefaultAsync();
             return result;
         }
@@ -74,6 +74,7 @@ namespace DataAccess.Concrete.EntityFramework
             var result = await (from p in Context.Products
                           join s in Context.Stores
                           on p.Id equals s.ProductId
+                          where s.isDeleted == false
                           select new StoreDto()
                           {
                               ProductName = p.Name,

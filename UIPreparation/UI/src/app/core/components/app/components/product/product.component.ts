@@ -33,7 +33,7 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	selectedValue: LookUp;
 
 	sizeControl = new FormControl();
-  filteredOptions: Observable<LookUp[]>;
+	filteredOptions: Observable<LookUp[]>;
 
 
 	productList: Product[];
@@ -58,7 +58,7 @@ export class ProductComponent implements AfterViewInit, OnInit {
 
 	}
 
-	getSizesEnumsLookUp(){
+	getSizesEnumsLookUp() {
 		this.sizeNames.forEach(element => {
 			this.sizesLookUp.push({ id: Number(element), label: SizeMapping[Number(element)] });
 		});
@@ -67,19 +67,19 @@ export class ProductComponent implements AfterViewInit, OnInit {
 			map(value => {
 				const name = typeof value === 'string' ? value : value?.name;
 				return name ? this._filter(name as string) : this.sizesLookUp.slice();
-			  }),
-		  );
+			}),
+		);
 	}
 
 	private _filter(value: string): LookUp[] {
 		const filterValue = value.toLowerCase();
-	
-		return this.sizesLookUp.filter(option => option.label.toLowerCase().includes(filterValue));
-	  }
 
-	  displayFn(data: LookUp): string {
+		return this.sizesLookUp.filter(option => option.label.toLowerCase().includes(filterValue));
+	}
+
+	displayFn(data: LookUp): string {
 		return data && data.label ? data.label : '';
-	  }
+	}
 
 
 	getProductList() {
@@ -91,9 +91,9 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	save() {
-		this.productAddForm.controls.size.setValue(this.sizeControl.value.label);		
-		
-		
+		this.productAddForm.controls.size.setValue(this.sizeControl.value.label);
+
+
 		if (this.productAddForm.valid) {
 			this.product = Object.assign({}, this.productAddForm.value)
 
@@ -177,6 +177,12 @@ export class ProductComponent implements AfterViewInit, OnInit {
 		Object.keys(group.controls).forEach(key => {
 			group.get(key).setErrors(null);
 			if (key == 'id')
+				group.get(key).setValue(0);
+			if (key == 'name')
+				group.get(key).setValue(0);
+			if (key == 'color')
+				group.get(key).setValue(0);
+			if (key == 'size')
 				group.get(key).setValue(0);
 		});
 	}
