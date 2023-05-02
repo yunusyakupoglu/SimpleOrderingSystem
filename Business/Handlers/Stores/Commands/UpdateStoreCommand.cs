@@ -63,10 +63,14 @@ namespace Business.Handlers.Stores.Commands
                 isThereStoreRecord.isReady = (isThereStoreRecord.Stock == 0) ? false : request.isReady;
 
 
-
+                if (request.Stock >= 0)
+                {
                 _storeRepository.Update(isThereStoreRecord);
                 await _storeRepository.SaveChangesAsync();
                 return new SuccessResult(Messages.Updated);
+                }
+                return new ErrorResult("Stok 0'dan küçük olamaz.");
+
             }
         }
     }

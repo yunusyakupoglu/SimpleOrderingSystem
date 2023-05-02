@@ -31,18 +31,12 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	sizesLookUp: LookUp[] = [];
 	sizeNames: string[] = Object.keys(SizeMapping);
 	selectedValue: LookUp;
-
 	sizeControl = new FormControl();
 	filteredOptions: Observable<LookUp[]>;
-
-
 	productList: Product[];
 	product: Product = new Product();
 	eSize: ESize;
-
 	productAddForm: FormGroup;
-
-
 	productId: number;
 
 	constructor(private productService: ProductService, private lookupService: LookUpService, private alertifyService: AlertifyService, private formBuilder: FormBuilder, private authService: AuthService) { }
@@ -52,10 +46,8 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	ngOnInit() {
-
-		this.createProductAddForm();
 		this.getSizesEnumsLookUp();
-
+		this.createProductAddForm();
 	}
 
 	getSizesEnumsLookUp() {
@@ -93,7 +85,6 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	save() {
 		this.productAddForm.controls.size.setValue(this.sizeControl.value.label);
 
-
 		if (this.productAddForm.valid) {
 			this.product = Object.assign({}, this.productAddForm.value)
 
@@ -102,7 +93,6 @@ export class ProductComponent implements AfterViewInit, OnInit {
 			else
 				this.updateProduct();
 		}
-
 	}
 
 	addProduct() {
@@ -136,15 +126,11 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	createProductAddForm() {
-		debugger;
 		this.productAddForm = this.formBuilder.group({
 			id: [0],
 			createdUserId: [0],
-			createdDate: [Date.now],
 			lastUpdatedUserId: [0],
-			lastUpdatedDate: [Date.now],
 			status: [true],
-			isDeleted: [false],
 			name: ["", Validators.required],
 			color: ["", Validators.required],
 			size: ["", Validators.required]
@@ -161,9 +147,13 @@ export class ProductComponent implements AfterViewInit, OnInit {
 	}
 
 	getProductById(productId: number) {
+		debugger
 		this.clearFormGroup(this.productAddForm);
 		this.productService.getProductById(productId).subscribe(data => {
 			this.product = data;
+
+			// Set selected size in mat-autocomplete
+			this.sizeControl.setValue(this.sizesLookUp.find(x => x.label == data.size));
 			this.productAddForm.patchValue(data);
 		})
 	}
@@ -179,12 +169,14 @@ export class ProductComponent implements AfterViewInit, OnInit {
 			if (key == 'id')
 				group.get(key).setValue(0);
 			if (key == 'name')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 			if (key == 'color')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 			if (key == 'size')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
+				// group.get(key).reset();
 		});
+		this.sizeControl.setValue("");
 	}
 
 	checkClaim(claim: string): boolean {

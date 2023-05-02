@@ -28,10 +28,6 @@ export class OrderService {
     return this.httpClient.get<Order>(environment.getApiUrl + '/orders/getbyid?id='+id)
   }
 
-  getOrderDtoById(id: number): Observable<OrderDto> {
-    return this.httpClient.get<OrderDto>(environment.getApiUrl + '/orders/getdtobyid?id='+id)
-  }
-
   addOrder(order: Order): Observable<any> {
 
     return this.httpClient.post(environment.getApiUrl + '/orders/', order, { responseType: 'text' });

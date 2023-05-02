@@ -28,11 +28,7 @@ namespace Business.Handlers.Orders.Commands
     {
 
         public int CreatedUserId { get; set; }
-        public System.DateTime CreatedDate { get; set; }
         public int LastUpdatedUserId { get; set; }
-        public System.DateTime LastUpdatedDate { get; set; }
-        public bool Status { get; set; }
-        public bool isDeleted { get; set; }
         public int CustomerId { get; set; }
         public int ProductId { get; set; }
         public int Stock { get; set; }
@@ -66,37 +62,37 @@ namespace Business.Handlers.Orders.Commands
 
                 if (isExistStore.Result.Data)
                 {
-                    var getStoreByProductIdAndSize = _mediator.Send(new GetStoreByProductIdAndSizeQuery { ProductId = request.ProductId });
-                    var addedOrder = new Order
-                    {
-                        CreatedUserId = request.CreatedUserId,
-                        CreatedDate = System.DateTime.Now,
-                        LastUpdatedUserId = request.LastUpdatedUserId,
-                        LastUpdatedDate = System.DateTime.Now,
-                        Status = true,
-                        isDeleted = false,
-                        CustomerId = request.CustomerId,
-                        ProductId = request.ProductId,
-                        Stock = request.Stock,
-
-                    };
+                    var getStoreByProductId = _mediator.Send(new getStoreByProductIdQuery { ProductId = request.ProductId });
 
                     var update = await _mediator.Send(new UpdateStoreCommand
                     {
-                        isReady = getStoreByProductIdAndSize.Result.Data.IsReady,
-                        CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDate,
-                        CreatedUserId = getStoreByProductIdAndSize.Result.Data.CreatedUserId,
-                        isDeleted = getStoreByProductIdAndSize.Result.Data.isDeleted,
+                        isReady = getStoreByProductId.Result.Data.isReady,
+                        CreatedDate = getStoreByProductId.Result.Data.CreatedDate,
+                        CreatedUserId = getStoreByProductId.Result.Data.CreatedUserId,
+                        isDeleted = getStoreByProductId.Result.Data.isDeleted,
                         LastUpdatedDate = DateTime.Now,
                         LastUpdatedUserId = request.LastUpdatedUserId,
-                        Status = getStoreByProductIdAndSize.Result.Data.Status,
-                        Id = getStoreByProductIdAndSize.Result.Data.Id,
-                        Stock = getStoreByProductIdAndSize.Result.Data.Stock - request.Stock,
-                        ProductId = getStoreByProductIdAndSize.Result.Data.ProductId
+                        Status = getStoreByProductId.Result.Data.Status,
+                        Id = getStoreByProductId.Result.Data.Id,
+                        Stock = getStoreByProductId.Result.Data.Stock - request.Stock,
+                        ProductId = getStoreByProductId.Result.Data.ProductId
                     });
 
                     if (update.Success)
                     {
+                        var addedOrder = new Order
+                        {
+                            CreatedUserId = request.CreatedUserId,
+                            CreatedDate = System.DateTime.Now,
+                            LastUpdatedUserId = request.LastUpdatedUserId,
+                            LastUpdatedDate = System.DateTime.Now,
+                            Status = true,
+                            isDeleted = false,
+                            CustomerId = request.CustomerId,
+                            ProductId = request.ProductId,
+                            Stock = request.Stock,
+
+                        };
                         _orderRepository.Add(addedOrder);
                         await _orderRepository.SaveChangesAsync();
                     }

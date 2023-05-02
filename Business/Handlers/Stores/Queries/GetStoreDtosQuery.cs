@@ -1,4 +1,7 @@
-﻿using Core.Utilities.Results;
+﻿using Business.BusinessAspects;
+using Core.Aspects.Autofac.Logging;
+using Core.CrossCuttingConcerns.Logging.Serilog.Loggers;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Dtos;
 using MediatR;
@@ -22,6 +25,9 @@ namespace Business.Handlers.Stores.Queries
                 _storeRepository = storeRepository;
             }
 
+
+            [LogAspect(typeof(FileLogger))]
+            [SecuredOperation(Priority = 1)]
             public async Task<IDataResult<IEnumerable<StoreDto>>> Handle(GetStoreDtosQuery request, CancellationToken cancellationToken)
             {
                 return new SuccessDataResult<IEnumerable<StoreDto>>(await _storeRepository.GetStoreDto());

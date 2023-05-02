@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using Entities.Dtos;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using ServiceStack;
+using System.Collections;
 
 namespace DataAccess.Concrete.EntityFramework
 {
@@ -23,50 +24,9 @@ namespace DataAccess.Concrete.EntityFramework
         {
         }
 
-        public async Task<ProductWithStoreDto> GetDtoAsync(int storeId)
+        public async Task<Store> GetStoreByProductId(int productId)
         {
-            var result = await (from p in Context.Products
-                               join s in Context.Stores
-                               on p.Id equals s.ProductId
-                               where s.Id == storeId
-                               select new ProductWithStoreDto
-                               {
-                                   ProductId = p.Id,
-                                   ProductName = p.Name,
-                                   Color = p.Color,
-                                   Size = p.Size,
-                                   Stock = s.Stock,
-                                   IsReady = s.isReady,
-                                   Id = s.Id,
-                                   CreatedDate = s.CreatedDate,
-                                   CreatedUserId = s.CreatedUserId,
-                                   isDeleted = s.isDeleted,
-                                   Status = s.Status
-                               }).SingleOrDefaultAsync();
-            return result;
-        }
-
-        public async Task<ProductWithStoreDto> GetProductWithStore(int productId)
-        {
-            var result = await (from p in Context.Products
-                                join s in Context.Stores
-                                on p.Id equals s.ProductId
-                                where p.Id == productId
-                                select new ProductWithStoreDto
-                                {
-                                    ProductId = p.Id,
-                                    ProductName = p.Name,
-                                    Color = p.Color,
-                                    Size = p.Size,
-                                    Stock = s.Stock,
-                                    IsReady = s.isReady,
-                                    Id = s.Id,
-                                    CreatedDate = s.CreatedDate,
-                                    CreatedUserId = s.CreatedUserId,
-                                    isDeleted = s.isDeleted,
-                                    Status = s.Status
-                                }).SingleOrDefaultAsync();
-            return result;
+            return await Context.Stores.Where(x=>x.ProductId == productId && x.isDeleted == false).SingleOrDefaultAsync();
         }
 
         public async Task<List<StoreDto>> GetStoreDto()

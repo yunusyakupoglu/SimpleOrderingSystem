@@ -20,30 +20,6 @@ namespace DataAccess.Concrete.EntityFramework
         {
         }
 
-        public async Task<OrderDto> GetDtoAsync(int orderId)
-        {
-            var result = await(from o in Context.Orders
-                               join c in Context.Customers on o.CustomerId equals c.Id
-                               join p in Context.Products on o.ProductId equals p.Id
-                               where o.Id == orderId && o.isDeleted == false
-                               select new OrderDto
-                               {
-                                   Id = o.Id,
-                                   CustomerId = c.Id,
-                                   CustomerName = c.CustomerName,
-                                   ProductId = p.Id,
-                                   ProductName = p.Name,
-                                   Stock = o.Stock,
-                                   CreatedDate = o.CreatedDate,
-                                   CreatedUserId = o.CreatedUserId,
-                                   isDeleted = o.isDeleted,
-                                   LastUpdatedDate = o.LastUpdatedDate,
-                                   LastUpdatedUserId = o.LastUpdatedUserId,
-                                   Status = o.Status
-                               }).SingleOrDefaultAsync();
-            return result;
-        }
-
         public async Task<List<OrderDto>> GetOrderDto()
         {
             var result = await (from o in Context.Orders

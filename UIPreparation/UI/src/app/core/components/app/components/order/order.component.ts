@@ -57,6 +57,7 @@ export class OrderComponent implements AfterViewInit, OnInit {
 
 
 	orderId: number;
+	productList: Product[];
 
 	constructor(private orderService: OrderService, private lookupService: LookUpService, private alertifyService: AlertifyService, private formBuilder: FormBuilder, private authService: AuthService, private productService: ProductService, private storeService: StoreService, private customerService: CustomerService) { }
 
@@ -94,7 +95,11 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		return this.storeDtoList.filter(option => option.productName.toLowerCase().includes(filterValue));
 	}
 
-
+	getProductList(){
+		this.productService.getProductList().subscribe(data => {
+			this.productList = data;
+		})
+	}
 
 	getCustomersLookUp() {
 		this.customerService.getCustomerList().subscribe(data => {
@@ -130,11 +135,13 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	}
 
 	save() {
-		debugger;
 		this.orderAddForm.controls.productId.setValue(this.storeDtoControl.value.productId);
 		this.orderAddForm.controls.customerId.setValue(this.customerControl.value.id);
 		// this.orderAddForm.controls.id.setValue(this.order.id);
 		if (this.orderAddForm.valid) {
+			console.log(this.orderAddForm.value);
+			
+
 			this.order = Object.assign({}, this.orderAddForm.value)
 
 			if (this.order.id == 0)
@@ -160,7 +167,6 @@ export class OrderComponent implements AfterViewInit, OnInit {
 	}
 
 	updateOrder() {
-		debugger;
 		this.order.lastUpdatedUserId = this.authService.getUserId();
 		this.orderService.updateOrder(this.order).subscribe(data => {
 			var index = this.orderDtoList.findIndex(x => x.id == this.order.id);
@@ -172,6 +178,9 @@ export class OrderComponent implements AfterViewInit, OnInit {
 			jQuery('#order').modal('hide');
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.orderAddForm);
+
+		},error =>{
+			this.alertifyService.error("Ürün stok adedi 0'dan küçük olamaz.");
 
 		})
 
@@ -202,48 +211,16 @@ export class OrderComponent implements AfterViewInit, OnInit {
 		this.clearFormGroup(this.orderAddForm);
 		this.orderService.getOrderById(orderId).subscribe(data => {
 			this.order = data;
-			this.orderAddForm.patchValue(data);
-		})
-	}
 
-	getOrderDtoById(orderId: number) {
-		debugger;
-		this.clearFormGroup(this.orderAddForm);
-		this.orderService.getOrderDtoById(orderId).subscribe(data => {
-			this.order = {
-				id: data.id,
-				isDeleted: data.isDeleted,
-				status: data.status,
-				createdDate: data.createdDate,
-				createdUserId: data.createdUserId,
-				customerId: data.customerId,
-				lastUpdatedDate: data.lastUpdatedDate,
-				lastUpdatedUserId: data.lastUpdatedUserId,
-				productId: data.productId,
-				stock: data.stock
-			};
-			//this.orderAddForm.patchValue(data);
-			console.log(data, "odata");
-
-
-			// Set selected product in mat-autocomplete
 			const selectedProduct = this.storeDtoList.find(store => store.productId === data.productId);
 			this.storeDtoControl.setValue(selectedProduct);
 
-			console.log(selectedProduct, "sproduct");
-
-
-			// Set selected customer in mat-autocomplete
 			const selectedCustomer = this.customerList.find(customer => customer.id === data.customerId);
 			this.customerControl.setValue(selectedCustomer);
-			console.log(selectedCustomer, "scustomer");
 
 			this.orderAddForm.patchValue(data);
-
-
 		})
 	}
-
 
 	clearFormGroup(group: FormGroup) {
 
@@ -261,6 +238,10 @@ export class OrderComponent implements AfterViewInit, OnInit {
 			if (key == 'stock')
 				group.get(key).setValue(0);
 		});
+
+		this.customerControl.setValue("");
+		this.storeDtoControl.setValue("");
+
 	}
 
 	checkClaim(claim: string): boolean {

@@ -52,41 +52,47 @@ namespace Business.Handlers.Orders.Commands
             public async Task<IResult> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
             {
                 var isThereOrderRecord = await _orderRepository.GetAsync(u => u.Id == request.Id);
-                var getStoreByProductIdAndSize = _mediator.Send(new GetStoreByProductIdAndSizeQuery { ProductId = request.ProductId });
+                var getStoreByProductId = _mediator.Send(new getStoreByProductIdQuery { ProductId = request.ProductId });
                 var newStoreStock = isThereOrderRecord.Stock - request.Stock;
+                var fullStock = getStoreByProductId.Result.Data.Stock + isThereOrderRecord.Stock;
+                //kontrol yapılacak ürün sayısı 0 dan düşük olamaz
 
-                isThereOrderRecord.CreatedUserId = request.CreatedUserId;
-                isThereOrderRecord.CreatedDate = request.CreatedDate;
-                isThereOrderRecord.LastUpdatedUserId = request.LastUpdatedUserId;
-                isThereOrderRecord.LastUpdatedDate = System.DateTime.Now;
-                isThereOrderRecord.Status = request.Status;
-                isThereOrderRecord.isDeleted = request.isDeleted;
-                isThereOrderRecord.CustomerId = request.CustomerId;
-                isThereOrderRecord.ProductId = request.ProductId;
-                isThereOrderRecord.Stock = request.Stock;
-
-
-                var update = await _mediator.Send(new UpdateStoreCommand
+                if (fullStock >= request.Stock)
                 {
-                    isReady = getStoreByProductIdAndSize.Result.Data.IsReady,
-                    CreatedDate = getStoreByProductIdAndSize.Result.Data.CreatedDate,
-                    CreatedUserId = getStoreByProductIdAndSize.Result.Data.CreatedUserId,
-                    isDeleted = getStoreByProductIdAndSize.Result.Data.isDeleted,
-                    LastUpdatedDate = DateTime.Now,
-                    LastUpdatedUserId = request.LastUpdatedUserId,
-                    Status = getStoreByProductIdAndSize.Result.Data.Status,
-                    Id = getStoreByProductIdAndSize.Result.Data.Id,
-                    Stock = newStoreStock + getStoreByProductIdAndSize.Result.Data.Stock,
-                    ProductId = getStoreByProductIdAndSize.Result.Data.ProductId
-                });
+                    var update = await _mediator.Send(new UpdateStoreCommand
+                    {
+                        isReady = getStoreByProductId.Result.Data.isReady,
+                        CreatedDate = getStoreByProductId.Result.Data.CreatedDate,
+                        CreatedUserId = getStoreByProductId.Result.Data.CreatedUserId,
+                        isDeleted = getStoreByProductId.Result.Data.isDeleted,
+                        LastUpdatedDate = DateTime.Now,
+                        LastUpdatedUserId = request.LastUpdatedUserId,
+                        Status = getStoreByProductId.Result.Data.Status,
+                        Id = getStoreByProductId.Result.Data.Id,
+                        Stock = newStoreStock + getStoreByProductId.Result.Data.Stock,
+                        ProductId = getStoreByProductId.Result.Data.ProductId
+                    });
 
-                if (update.Success)
-                {
-                _orderRepository.Update(isThereOrderRecord);
-                await _orderRepository.SaveChangesAsync();
-                return new SuccessResult(Messages.Updated);
+                    if (update.Success)
+                    {
+                        isThereOrderRecord.CreatedUserId = request.CreatedUserId;
+                        isThereOrderRecord.CreatedDate = System.DateTime.Now;
+                        isThereOrderRecord.LastUpdatedUserId = request.LastUpdatedUserId;
+                        isThereOrderRecord.LastUpdatedDate = System.DateTime.Now;
+                        isThereOrderRecord.Status = request.Status;
+                        isThereOrderRecord.isDeleted = request.isDeleted;
+                        isThereOrderRecord.CustomerId = request.CustomerId;
+                        isThereOrderRecord.ProductId = request.ProductId;
+                        isThereOrderRecord.Stock = request.Stock;
+
+                        _orderRepository.Update(isThereOrderRecord);
+                        await _orderRepository.SaveChangesAsync();
+                        return new SuccessResult(Messages.Updated);
+                    }
+                    return new ErrorResult("Sipariş kaydı güncellenemedi.");
                 }
-                return new ErrorResult("Sipariş kaydı güncellenemedi.");
+                return new ErrorResult("Ürün stok adedi 0'dan küçük olamaz.");
+
             }
         }
     }

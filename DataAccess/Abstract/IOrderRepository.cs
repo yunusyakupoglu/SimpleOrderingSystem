@@ -12,7 +12,5 @@ namespace DataAccess.Abstract
     public interface IOrderRepository : IEntityRepository<Order>
     {
         Task<List<OrderDto>> GetOrderDto();
-        Task<OrderDto> GetDtoAsync(int orderId);
-
     }
 }

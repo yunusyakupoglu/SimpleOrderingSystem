@@ -13,10 +13,7 @@ namespace DataAccess.Abstract
     public interface IStoreRepository : IEntityRepository<Store> 
     {
         Task<List<StoreDto>> GetStoreDto();
-        Task<ProductWithStoreDto> GetProductWithStore(int productId);
+        Task<Store> GetStoreByProductId(int productId);
         Task<bool> IsExistStore(int productId, int stock);
-
-        Task<ProductWithStoreDto> GetDtoAsync(int storeId);
-
     }
 }

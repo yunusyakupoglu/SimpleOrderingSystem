@@ -100,11 +100,8 @@ export class CustomerComponent implements AfterViewInit, OnInit {
 		this.customerAddForm = this.formBuilder.group({
 			id: [0],
 			createdUserId: [0],
-			createdDate: [Date.now],
 			lastUpdatedUserId: [0],
-			lastUpdatedDate: [Date.now],
 			status: [true],
-			isDeleted: [false],
 			customerName: ["", Validators.required],
 			customerCode: ["", Validators.required],
 			customerAddress: ["", Validators.required],
@@ -141,15 +138,15 @@ export class CustomerComponent implements AfterViewInit, OnInit {
 			if (key == 'id')
 				group.get(key).setValue(0);
 			if (key == 'customerName')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 			if (key == 'customerCode')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 			if (key == 'customerAddress')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 			if (key == 'phoneNumber')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 				if (key == 'email')
-				group.get(key).setValue(0);
+				group.get(key).setValue("");
 		});
 	}
 

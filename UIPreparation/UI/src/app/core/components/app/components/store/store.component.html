@@ -18,53 +18,7 @@
                 </mat-form-field>
               </div>
               <table mat-table [dataSource]="dataSource" matSort>
-
-
-
-                <ng-container matColumnDef="id">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'Id'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.id}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="createdUserId">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'CreatedUserId'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.createdUserId}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="createdDate">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'CreatedDate'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.createdDate}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="lastUpdatedUserId">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'LastUpdatedUserId'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.lastUpdatedUserId}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="lastUpdatedDate">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'LastUpdatedDate'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.lastUpdatedDate}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'Status'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">
-                    <mat-checkbox [checked]="element.status" [disabled]="true"></mat-checkbox>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="isDeleted">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'isDeleted'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">
-                    <mat-checkbox [checked]="element.isDeleted" [disabled]="true"></mat-checkbox>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="productId">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'ProductId'|translate}}</th>
-                  <td mat-cell *matCellDef="let element">{{element.productId}}</td>
-                </ng-container>
-
+               
                 <ng-container matColumnDef="productName">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'ProductName'|translate}}</th>
                   <td mat-cell *matCellDef="let element">{{element.productName}}</td>
@@ -89,7 +43,7 @@
                   <th mat-header-cell *matHeaderCellDef></th>
                   <td style="width: 25px;" mat-cell *matCellDef="let element">
                     <a *ngIf="checkClaim('UpdateStoreCommand')" data-toggle="modal" data-target="#store"
-                      (click)="getStoreDtoById(element.id)">
+                      (click)="getStoreById(element.id)">
                       <i title="{{'Update'| translate}}" style="color:#ff5722;" class="far fa-edit"></i>
                     </a>
                   </td>

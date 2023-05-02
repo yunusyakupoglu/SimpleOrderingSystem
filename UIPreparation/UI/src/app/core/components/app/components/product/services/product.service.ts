@@ -19,6 +19,7 @@ export class ProductService {
   }
 
   getProductById(id: number): Observable<Product> {
+    debugger
     return this.httpClient.get<Product>(environment.getApiUrl + '/products/getbyid?id='+id)
   }
 
