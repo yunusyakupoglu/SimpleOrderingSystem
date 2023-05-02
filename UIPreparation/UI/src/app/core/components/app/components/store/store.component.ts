@@ -128,6 +128,9 @@ export class StoreComponent implements AfterViewInit, OnInit {
 			jQuery('#store').modal('hide');
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.storeAddForm);
+		},error =>{
+			this.alertifyService.error("Bu ürün kaydı depoda zaten var. Lütfen depodaki ürünün stok adedini güncelleyiniz.");
+
 		})
 	}
 

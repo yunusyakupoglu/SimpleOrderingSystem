@@ -75,6 +75,9 @@ export class CustomerComponent implements AfterViewInit, OnInit {
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.customerAddForm);
 
+		},error =>{
+			this.alertifyService.error("Bu müşteri veritabanında mevcut.");
+
 		})
 
 	}

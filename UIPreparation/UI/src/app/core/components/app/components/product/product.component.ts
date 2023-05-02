@@ -105,6 +105,9 @@ export class ProductComponent implements AfterViewInit, OnInit {
 			this.alertifyService.success(data);
 			this.clearFormGroup(this.productAddForm);
 
+		},error =>{
+			this.alertifyService.error("Bu ürün veritabanında mevcut.");
+
 		})
 
 	}
